@@ -1,0 +1,16 @@
+[package]
+name = "code"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.68"
+cfg-if = "1"
+winit = "0.27"
+tokio = "1.0"
+env_logger = "0.9"
+log = "0.4"
+pollster = "0.2"
+wgpu = "0.14"
