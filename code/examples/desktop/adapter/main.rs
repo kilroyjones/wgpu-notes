@@ -1,10 +1,12 @@
+use wgpu::{Instance, Adapter};
 use winit::{
-    // event::{WindowEvent, Event},
-    event::*,
+    event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
     window::{Window, WindowBuilder}
 };
-use wgpu::{Instance, Adapter};
+
+#[cfg(target_arch="wasm32")]
+use wasm_bindgen::prelude::*;
 
 pub fn create_window(event_loop: &EventLoop<()>) -> Option<Window> {
     match WindowBuilder::new().build(&event_loop) { 
@@ -13,10 +15,12 @@ pub fn create_window(event_loop: &EventLoop<()>) -> Option<Window> {
             // Log error 
             None 
         }
-    }
+    } 
+
 }
 
-pub async fn get_adapter(instance: &Instance) -> Option<Adapter> {
+pub async fn get_adapter() -> Option<Adapter> {
+    let instance: Instance = wgpu::Instance::new(wgpu::Backends::all());
     instance
         .request_adapter(&wgpu::RequestAdapterOptions::default())
         .await
@@ -31,17 +35,16 @@ pub fn handle_window_events(event: WindowEvent<'_>, control_flow: &mut ControlFl
     }
 }
 
-
+#[cfg_attr(target_arch="wasm32", wasm_bindgen(start))]
 pub async fn run() {
     let event_loop = EventLoop::new();
-    let instance = wgpu::Instance::new(wgpu::Backends::all());
 
     let window = match create_window(&event_loop) {
         Some(window) => window, 
         None => panic!("Unable to create window")
     };
     
-    let adapter = match get_adapter(&instance).await {
+    let adapter = match get_adapter().await {
         Some(adapter) => {
             adapter
         }
@@ -55,7 +58,7 @@ pub async fn run() {
                 event,
                 window_id,
             } => {
-                if window_id == window.id() { 
+                if window_id == window.id() {
                     handle_window_events(event, control_flow);
                 }
             }
@@ -65,6 +68,13 @@ pub async fn run() {
 }
 
 fn main() {
-    env_logger::init();
-    pollster::block_on(run());
+    cfg_if::cfg_if! {
+         if #[cfg(target_arch = "wasm32")] {
+            std::panic::set_hook(Box::new(console_error_panic_hook::hook));
+            console_log::init_with_level(log::Level::Warn).expect("Couldn't initialize logger");
+            pollster::block_on(run());
+        } else {
+            panic!("Error: This is is only set to run as wasm.");
+        }
+    }
 }
