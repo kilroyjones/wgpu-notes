@@ -6,10 +6,13 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[build]
+target = "wasm32-unknown-unknown"
+
 [dependencies]
 anyhow = "1.0.68"
 cfg-if = "1"
-winit = "0.27"
+winit = {version="0.27", features=["web"]}
 tokio = "1.0"
 log = "0.4"
 pollster = "0.2"

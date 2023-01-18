@@ -14,15 +14,24 @@ pub fn create_window(event_loop: &EventLoop<()>) -> Option<Window> {
     }
 }
 
-pub fn handle_window_events(event: WindowEvent<'_>, control_flow: &mut ControlFlow) {
+pub fn handle_events(event: Event<()>, control_flow: &mut ControlFlow, window: &Window) {
     match event {
-        WindowEvent::CloseRequested => {
-            *control_flow = ControlFlow::Exit;
-        },
+        Event::WindowEvent {
+            event,
+            window_id,
+        } => {
+            if window_id == window.id() {
+                match event{
+                    WindowEvent::CloseRequested => {
+                    *control_flow = ControlFlow::Exit;
+                    },
+                    _ => {}
+                };
+            }
+        }
         _ => {}
-    }
+    };
 }
-
 
 pub async fn run() {
     let event_loop = EventLoop::new();
@@ -33,17 +42,7 @@ pub async fn run() {
     };
     
     event_loop.run(move | event: Event<()>, _, control_flow: &mut ControlFlow | {
-        match event {
-            Event::WindowEvent {
-                event,
-                window_id,
-            } => {
-                if window_id == window.id() {
-                    handle_window_events(event, control_flow);
-                }
-            }
-            _ => {}
-        };
+        handle_events(event, control_flow, &window);
     });
 }
 

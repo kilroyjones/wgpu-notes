@@ -1,8 +1,10 @@
+mod state;
+
+use state::State;
+use wgpu::{Instance, Adapter};
 use winit::{
-    dpi::PhysicalSize,
     event::{Event, WindowEvent},
     event_loop::{ControlFlow, EventLoop},
-    platform::web::WindowExtWebSys,
     window::{Window, WindowBuilder}
 };
 
@@ -13,24 +15,14 @@ pub fn create_window(event_loop: &EventLoop<()>) -> Option<Window> {
             // Log error 
             None 
         }
-    }
+    } 
 }
 
-
-pub fn create_canvas(window: &Window) {
-    window.set_inner_size(PhysicalSize::new(450, 400));
-    
-    match web_sys::window()
-        .and_then(|win| win.document())
-        .and_then(|doc| {
-            let dst = doc.get_element_by_id("wasm-example")?;
-            let canvas = web_sys::Element::from(window.canvas());
-            dst.append_child(&canvas).ok()?;
-            Some(())
-        }) {
-            Some(_) => return,
-            None => panic!("Error: Unable to create canvas")
-        }
+pub async fn get_adapter() -> Option<Adapter> {
+    let instance: Instance = wgpu::Instance::new(wgpu::Backends::all());
+    instance
+        .request_adapter(&wgpu::RequestAdapterOptions::default())
+        .await
 }
 
 pub fn handle_events(event: Event<()>, control_flow: &mut ControlFlow, window: &Window) {
@@ -52,18 +44,31 @@ pub fn handle_events(event: Event<()>, control_flow: &mut ControlFlow, window: &
     };
 }
 
-#[cfg_attr(target_arch="wasm32", wasm_bindgen(start))]
-pub fn run() {
+
+pub async fn run() {
     let event_loop = EventLoop::new();
 
     let window = match create_window(&event_loop) {
         Some(window) => window, 
         None => panic!("Unable to create window")
     };
-
-    create_canvas(&window);
     
+    let adapter = match get_adapter().await {
+        Some(adapter) => {
+            adapter
+        }
+        None => panic!("Unable to find a suitable WPGU adapter")
+    };
+    println!("Adapter loaded: {:?}", adapter);
+
+    let state  = State::new(&window, &adapter).await;
+
     event_loop.run(move | event: Event<()>, _, control_flow: &mut ControlFlow | {
         handle_events(event, control_flow, &window);
     });
+}
+
+fn main() {
+    env_logger::init();
+    pollster::block_on(run());
 }

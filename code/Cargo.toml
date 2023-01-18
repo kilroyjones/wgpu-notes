@@ -3,9 +3,6 @@ name = "code"
 version = "0.1.0"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
-
 [dependencies]
 anyhow = "1.0.68"
 cfg-if = "1"
@@ -16,19 +13,23 @@ log = "0.4"
 pollster = "0.2"
 wgpu = "0.14"
 
-[target.'cfg(target_arch = "wasm32")'.dependencies]
-console_error_panic_hook = "0.1.6"
-console_log = "0.2.0"
-wgpu = { version = "0.14.2", features = ["webgl"]}
-wasm-bindgen = "0.2.76"
-wasm-bindgen-futures = "0.4.30"
-wasm-bindgen-test = "0.3.33"
-web-sys = { version = "0.3.53", features = [
-    "Document",
-    "Window",
-    "Element",
-]}
-
 [[example]]
 name = "desktop-window"
 path = "examples/desktop/window/main.rs"
+
+[[example]]
+name = "desktop-adapter"
+path = "examples/desktop/adapter/main.rs"
+
+[[example]]
+name = "desktop-state"
+path = "examples/desktop/state/main.rs"
+
+[[example]]
+name = "web-window"
+path = "examples/web/window/"
+
+[workspaces]
+modules = [
+    "./examples"
+]
