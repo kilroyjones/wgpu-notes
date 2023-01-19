@@ -47,7 +47,7 @@ pub async fn run() {
         Some(window) => window, 
         None => panic!("Unable to create window")
     };
-    
+
     let instance: Instance = wgpu::Instance::new(wgpu::Backends::all());
     let adapter = match get_adapter(&instance).await {
         Some(adapter) => {

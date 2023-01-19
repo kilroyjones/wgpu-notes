@@ -1,9 +1,13 @@
+mod events;
+mod graphics;
 mod state;
 
+
+use events::handle_events;
 use state::State;
 use wgpu::{Instance, Adapter};
 use winit::{
-    event::{Event, WindowEvent},
+    event::{Event},
     event_loop::{ControlFlow, EventLoop},
     window::{Window, WindowBuilder}
 };
@@ -25,30 +29,6 @@ pub async fn get_adapter() -> Option<Adapter> {
         .await
 }
 
-pub fn handle_events(
-    event: Event<()>,
-    control_flow: &mut ControlFlow,
-    window: &Window) {
-
-    match event {
-        Event::WindowEvent {
-            event,
-            window_id,
-        } => {
-            if window_id == window.id() {
-                match event{
-                    WindowEvent::CloseRequested => {
-                    *control_flow = ControlFlow::Exit;
-                    },
-                    _ => {}
-                };
-            }
-        }
-        _ => {}
-    };
-}
-
-
 pub async fn run() {
     let event_loop = EventLoop::new();
 
@@ -57,19 +37,11 @@ pub async fn run() {
         None => panic!("Unable to create window")
     };
     
-    let adapter = match get_adapter().await {
-        Some(adapter) => {
-            adapter
-        }
-        None => panic!("Unable to find a suitable WPGU adapter")
-    };
-    println!("Adapter loaded: {:?}", adapter);
-
     #[allow(unused_variables)]
-    let state  = State::new(&window, &adapter).await;
+    let mut state  = State::new(&window).await;
 
     event_loop.run(move | event: Event<()>, _, control_flow: &mut ControlFlow | {
-        handle_events(event, control_flow, &window);
+        handle_events(event, control_flow, &window, &mut state);
     });
 }
 

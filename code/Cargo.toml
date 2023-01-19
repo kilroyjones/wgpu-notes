@@ -26,6 +26,10 @@ name = "desktop-state"
 path = "examples/desktop/state/main.rs"
 
 [[example]]
+name = "desktop-surface"
+path = "examples/desktop/surface/main.rs"
+
+[[example]]
 name = "web-window"
 path = "examples/web/window/"
 
